@@ -36,7 +36,7 @@ Commands:
 
 It's sufficient to type only the first character of a command (r -> raise).
 
-A conflict occurs when new package installs a path that was already provided by another one.
+A conflict occurs when a new package installs a path that was already provided by another one.
 In this situation, minpkg saves a backup of the old file before installing the new one.
 If the newer package is uninstalled, the backup file will be restored to its original path.
 The commands "from" & "raise" may be used to solve conflicts manually.
