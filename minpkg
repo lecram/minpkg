@@ -304,5 +304,5 @@ case "$cmd" in
     t|to)     pkg_to $@ ;;
     f|from)   pkg_from $@ ;;
     m|match)  pkg_match $@ ;;
-    *)      help >&2 && exit 1
+    *)        help >&2 && exit 1
 esac
