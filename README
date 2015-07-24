@@ -18,7 +18,7 @@ Commands:
     this creates skeleton metadata structure on ROOT/etc/pkg
   list ROOT
     print the name (PKGID) of all packages installed on ROOT
-    packages are listed in order of installation
+    packages are listed in order of priority (lower first)
   add ROOT PKGFILE
     install package from PKGFILE (a *.tgz file) to ROOT
     the PKGID is inferred from PKGFILE (/path/to/foo.tgz -> foo)
@@ -27,7 +27,10 @@ Commands:
   raise ROOT PKGID
     give all files from PKGID top priority on conflicts under ROOT
   from ROOT PATH
-    print PKGID of package currently providing PATH on ROOT
+    print PKGID of the package effectively providing PATH on ROOT
+  match ROOT PATH
+    print PKGID of all packages providing PATH on ROOT
+    packages are listed in order of priority (higher first)
   to PKGFILE
     print the path of each file in the package
 
