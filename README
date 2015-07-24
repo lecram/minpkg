@@ -1,0 +1,39 @@
+This is a minimal package manager implemented in a single shell script.
+
+Package metadata is maintained as plain text in /etc/pkg.
+
+Packages are *.tgz files with paths relative to the root directory.
+Path names in packages must not begin with a slash.
+Path names in packages must not contain whitespaces.
+
+Usage:
+  minpkg COMMAND [ARGS]
+
+Most commands need a ROOT argument that is the root path of the target file system.
+For example, to manage packages on the current rootfs, use "/" as the ROOT argument.
+
+Commands:
+  init ROOT
+    initialize package management on ROOT
+    this creates skeleton metadata structure on ROOT/etc/pkg
+  list ROOT
+    print the name (PKGID) of all packages installed on ROOT
+    packages are listed in order of installation
+  add ROOT PKGFILE
+    install package from PKGFILE (a *.tgz file) to ROOT
+    the PKGID is inferred from PKGFILE (/path/to/foo.tgz -> foo)
+  del ROOT PKGID
+    uninstall package named PKGID from ROOT
+  raise ROOT PKGID
+    give all files from PKGID top priority on conflicts under ROOT
+  from ROOT PATH
+    print PKGID of package currently providing PATH on ROOT
+  to PKGFILE
+    print the path of each file in the package
+
+It's sufficient to type only the first character of a command (r -> raise).
+
+A conflict occurs when new package installs a path that was already provided by another one.
+In this situation, minpkg saves a backup of the old file before installing the new one.
+If the newer package is uninstalled, the backup file will be restored to its original path.
+The commands "from" & "raise" may be used to solve conflicts manually.
