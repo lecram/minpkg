@@ -107,6 +107,7 @@ pkg_add () {
                 then
                     printf "$path\n" >> "$confl"
                 fi
+                printf "masked %s %s\n" "$from" "$path" >&2
                 mod=$((mod+1))
             else
                 add=$((add+1))
@@ -120,10 +121,10 @@ pkg_add () {
 
     printf "$pkgid\n" >> "$plist"
 
-    printf "+ $add\n"
+    printf "added %d new files\n" "$add"
     if [ $mod -ne 0 ]
     then
-        printf "! $mod\n"
+        printf "modified %d files\n" "$mod"
     fi
 }
 
@@ -166,6 +167,7 @@ pkg_del () {
             then
                 below=`sed -n '2p' "$match"`
                 mv "$1/$path.$below" "$1/$path"
+                printf "unmasked %s %s\n" "$below" "$path" >&2
                 mod=$((mod+1))
             else
                 rm "$1/$path.$pkgid"
@@ -188,15 +190,14 @@ pkg_del () {
     sed -n "/^$pkgid\$/!p" "$plist" > "$plist.tmp"
     mv "$plist.tmp" "$plist"
 
+    printf "removed %d files\n" "$sub"
     if [ $hid -ne 0 ]
     then
-        printf -- "- $sub:$hid\n"
-    else
-        printf -- "- $sub\n"
+        printf "removed %d masked files\n" "$hid"
     fi
     if [ $mod -ne 0 ]
     then
-        printf "! $mod\n"
+        printf "unmasked %d files\n" "$mod"
     fi
 }
 
@@ -307,7 +308,9 @@ pkg_raise () {
         if [ "$from" != "$pkgid" ]
         then
             mv "$1/$path" "$1/$path.$from"
+            printf "masked %s %s\n" "$from" "$path" >&2
             mv "$1/$path.$pkgid" "$1/$path"
+            printf "unmasked %s %s\n" "$pkgid" "$path" >&2
             mod=$((mod+1))
         fi
     done < "$raise"
@@ -317,7 +320,7 @@ pkg_raise () {
     mv "$plist.tmp" "$plist"
     printf "$pkgid\n" >> "$plist"
 
-    printf "! $mod\n"
+    printf "modified %d files\n" "$mod"
 }
 
 cmd="$1"
