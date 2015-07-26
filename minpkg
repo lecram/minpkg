@@ -11,6 +11,20 @@ fail () {
     exit 1
 }
 
+assert_readable () {
+    if [ ! -r "$1" ]
+    then
+        fail "you don't have read permissions on $1"
+    fi
+}
+
+assert_writable () {
+    if [ ! -w "$1" ]
+    then
+        fail "you don't have write permissions on $1"
+    fi
+}
+
 pkg_init () {
     if [ "$#" -ne 1 ]
     then
@@ -21,6 +35,8 @@ pkg_init () {
     then
         fail "$1 is not a directory"
     fi
+
+    assert_writable "$1"
 
     if [ -d "$1/etc/pkg/list" ]
     then
@@ -40,6 +56,8 @@ pkg_list () {
 
     plist="$1/etc/pkg/PACKAGES"
 
+    assert_readable "$1"
+
     if [ -f "$plist" ]
     then
         cat "$plist"
@@ -54,6 +72,8 @@ pkg_add () {
     then
         fail "usage: $0 add ROOT PKGFILE"
     fi
+
+    assert_writable "$1"
 
     if [ ! -f "$2" ]
     then
@@ -112,6 +132,8 @@ pkg_del () {
     then
         fail "usage: $0 del ROOT PKGID"
     fi
+
+    assert_writable "$1"
 
     pkgid=`basename "$2" .tgz`
     flist="$1/etc/pkg/list/$pkgid"
@@ -198,6 +220,8 @@ pkg_from () {
         fail "usage: $0 from ROOT PATH"
     fi
 
+    assert_readable "$1"
+
     plist="$1/etc/pkg/PACKAGES"
 
     if [ ! -f "$plist" ]
@@ -231,6 +255,8 @@ pkg_match () {
         fail "usage: $0 match ROOT PATH"
     fi
 
+    assert_readable "$1"
+
     plist="$1/etc/pkg/PACKAGES"
 
     if [ ! -f "$plist" ]
@@ -258,6 +284,8 @@ pkg_raise () {
     then
         fail "usage: $0 raise ROOT PKGID" >&2
     fi
+
+    assert_writable "$1"
 
     pkgid=`basename "$2" .tgz`
     flist="$1/etc/pkg/list/$pkgid"
