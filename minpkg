@@ -46,6 +46,8 @@ pkg_init () {
     mkdir -p "$1/etc/pkg/list"
     touch "$1/etc/pkg/PACKAGES"
     touch "$1/etc/pkg/CONFLICT"
+    mkdir -p "$1/bin"
+    cp "$0" "$1/bin/"
 }
 
 pkg_list () {
