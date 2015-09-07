@@ -310,7 +310,6 @@ pkg_raise () {
             mv "$1/$path" "$1/$path.$from"
             printf "masked %s %s\n" "$from" "$path" >&2
             mv "$1/$path.$pkgid" "$1/$path"
-            printf "unmasked %s %s\n" "$pkgid" "$path" >&2
             mod=$((mod+1))
         fi
     done < "$raise"
