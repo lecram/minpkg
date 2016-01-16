@@ -7,28 +7,32 @@ Path names in packages must not begin with a slash.
 Path names in packages must not contain whitespaces.
 
 Usage:
-  minpkg COMMAND [ARGS]
+  minpkg [-r ROOT] COMMAND [ARGS]
 
 Most commands need a ROOT argument that is the root path of the target file system.
 For example, to manage packages on the current rootfs, use "/" as the ROOT argument.
+The ROOT argument is searched in the following order:
+  1. the -r command-line option;
+  2. $MINPKG_ROOT environment variable;
+  3. current working directory.
 
 Commands:
-  init ROOT
+  init
     initialize package management on ROOT
     this creates skeleton metadata structure on ROOT/etc/pkg
-  list ROOT
+  list
     print the name (PKGID) of all packages installed on ROOT
     packages are listed in order of priority (lower first)
-  add ROOT PKGFILE
+  add PKGFILE
     install package from PKGFILE (a *.tgz file) to ROOT
     the PKGID is inferred from PKGFILE (/path/to/foo.tgz -> foo)
-  del ROOT PKGID
+  del PKGID
     uninstall package named PKGID from ROOT
-  raise ROOT PKGID
+  raise PKGID
     give all files from PKGID top priority on conflicts under ROOT
-  from ROOT PATH
+  from PATH
     print PKGID of the package effectively providing PATH on ROOT
-  match ROOT PATH
+  match PATH
     print PKGID of all packages providing PATH on ROOT
     packages are listed in order of priority (higher first)
   to PKGFILE
