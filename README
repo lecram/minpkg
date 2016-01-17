@@ -28,6 +28,8 @@ Commands:
     the PKGID is inferred from PKGFILE (/path/to/foo.tgz -> foo)
   del PKGID
     uninstall package named PKGID from ROOT
+  pack PKGID
+    create tarball from installed package
   raise PKGID
     give all files from PKGID top priority on conflicts under ROOT
   from PATH

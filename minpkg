@@ -3,7 +3,7 @@
 help () {
     printf "usage: $0 COMMAND [ARGS]\n"
     printf "available commands:\n"
-    printf "  init list add del raise to from match\n"
+    printf "  init list add del pack raise to from match\n"
 }
 
 fail () {
@@ -203,6 +203,27 @@ pkg_del () {
     fi
 }
 
+pkg_pack () {
+    if [ "$#" -ne 1 ]
+    then
+        fail "usage: $0 pack PKGID"
+    fi
+
+    assert_readable "$MINPKG_ROOT"
+
+    pkgid=`basename "$1" .tgz`
+    flist="$MINPKG_ROOT/etc/pkg/list/$pkgid"
+
+    if [ ! -f "$flist" ]
+    then
+        fail "$pkgid is not installed on $MINPKG_ROOT"
+    fi
+
+    fname="$1.tgz"
+    tar -c -z -C "$MINPKG_ROOT" -f "$fname" -T "$flist"
+    du -h "$fname"
+}
+
 pkg_to () {
     if [ "$#" -ne 1 ]
     then
@@ -343,6 +364,7 @@ case "$cmd" in
     l|list)   pkg_list $@ ;;
     a|add)    pkg_add $@ ;;
     d|del)    pkg_del $@ ;;
+    p|pack)   pkg_pack $@ ;;
     r|raise)  pkg_raise $@ ;;
     t|to)     pkg_to $@ ;;
     f|from)   pkg_from $@ ;;
