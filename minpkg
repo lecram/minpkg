@@ -82,7 +82,7 @@ pkg_add () {
         fail "file not found: $1"
     fi
 
-    pkgid=$(basename "$1" .tgz)
+    pkgid=$(basename "$1" .tar)
     flist="$MINPKG_ROOT/etc/pkg/list/$pkgid"
 
     if [ -f "$flist" ]
@@ -119,7 +119,7 @@ pkg_add () {
         fi
     done < "$flist"
 
-    tar -x -z -o -C "$MINPKG_ROOT" -f "$1"
+    tar -x -O -f "$1" files.tar.gz | tar -C "$MINPKG_ROOT" -x -z -o
 
     printf "%s\n" "$pkgid" >> "$plist"
 
@@ -138,7 +138,7 @@ pkg_del () {
 
     assert_writable "$MINPKG_ROOT"
 
-    pkgid=$(basename "$1" .tgz)
+    pkgid=$(basename "$1" .tar)
     flist="$MINPKG_ROOT/etc/pkg/list/$pkgid"
 
     if [ ! -f "$flist" ]
@@ -211,7 +211,7 @@ pkg_pack () {
 
     assert_readable "$MINPKG_ROOT"
 
-    pkgid=$(basename "$1" .tgz)
+    pkgid=$(basename "$1" .tar)
     flist="$MINPKG_ROOT/etc/pkg/list/$pkgid"
 
     if [ ! -f "$flist" ]
@@ -219,8 +219,18 @@ pkg_pack () {
         fail "$pkgid is not installed on $MINPKG_ROOT"
     fi
 
-    fname="$1.tgz"
-    tar -c -z -C "$MINPKG_ROOT" -f "$fname" -T "$flist"
+    cp "$flist" paths.txt
+    tar -c -C "$MINPKG_ROOT" -f files.tar -T paths.txt
+cat <<EOF > info.txt
+name:$(printf "$pkgid" | cut -d- -f1)
+version:$(printf "$pkgid" | cut -d- -f2)
+arch:$(uname -m)
+size:$(du files.tar | cut -f1)
+EOF
+    gzip files.tar
+    fname="$1.tar"
+    tar -c -f "$fname" info.txt paths.txt files.tar.gz
+    rm info.txt paths.txt files.tar.gz
     du -h "$fname"
 }
 
@@ -235,7 +245,7 @@ pkg_to () {
         fail "file not found: $1"
     fi
 
-    tar -t -z -f "$1" | grep -v '/$'
+    tar -O -x -f "$1" paths.txt
 }
 
 pkg_from () {
@@ -311,7 +321,7 @@ pkg_raise () {
 
     assert_writable "$MINPKG_ROOT"
 
-    pkgid=$(basename "$1" .tgz)
+    pkgid=$(basename "$1" .tar)
     flist="$MINPKG_ROOT/etc/pkg/list/$pkgid"
 
     if [ ! -f "$flist" ]
