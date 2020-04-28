@@ -214,9 +214,8 @@ pkg_del () {
     then
         nfiles=$(wc -l < "$flist")
         mpb -v "$nfiles" < "$tmpfifo"
-    else
-        wait $LOOP_PID 2> /dev/null
     fi
+    wait $LOOP_PID 2> /dev/null
     cat "$masks" >&2
     rm -f "$masks" "$tmpfifo" "$match"
 
@@ -401,9 +400,8 @@ pkg_raise () {
     then
         nfiles=$(wc -l < "$raise")
         mpb -v "$nfiles" < "$tmpfifo"
-    else
-        wait $LOOP_PID 2> /dev/null
     fi
+    wait $LOOP_PID 2> /dev/null
     cat "$masks" >&2
     rm -f "$masks" "$tmpfifo"
     rm "$raise"
