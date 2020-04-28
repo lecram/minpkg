@@ -90,6 +90,13 @@ pkg_add () {
         fail "$pkgid is already installed on $MINPKG_ROOT"
     fi
 
+    pkg_size=$(tar -O -x -f "$1" info.txt | awk -F: '$1=="size" {print $2}')
+    fs_space=$(df "$MINPKG_ROOT/" | awk '/\// {print $4}')
+    if [ "$pkg_size" -ge "$fs_space" ]
+    then
+        fail "not enough space on $MINPKG_ROOT to install package of ~ $((pkg_size / 1024)) MB"
+    fi
+
     plist="$MINPKG_ROOT/etc/pkg/PACKAGES"
     confl="$MINPKG_ROOT/etc/pkg/CONFLICT"
 
