@@ -172,6 +172,7 @@ pkg_del () {
         mkfifo "$tmpfifo"
     fi
     masks="masks.txt"
+    touch "$masks"
     while read path
     do
         if [ -x "$(command -v mpb)" ]
@@ -379,6 +380,7 @@ pkg_raise () {
         mkfifo "$tmpfifo"
     fi
     masks="masks.txt"
+    touch "$masks"
     while read path
     do
         if [ -x "$(command -v mpb)" ]
