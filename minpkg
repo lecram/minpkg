@@ -170,6 +170,8 @@ pkg_del () {
     if [ -x "$(command -v mpb)" ]
     then
         mkfifo "$tmpfifo"
+        nfiles=$(wc -l < "$flist")
+        mpb -v "$nfiles" < "$tmpfifo" &
     fi
     masks="masks.txt"
     touch "$masks"
@@ -208,14 +210,7 @@ pkg_del () {
             done
             sub=$((sub+1))
         fi
-    done < "$flist" &
-    LOOP_PID=$!
-    if [ -x "$(command -v mpb)" ]
-    then
-        nfiles=$(wc -l < "$flist")
-        mpb -v "$nfiles" < "$tmpfifo"
-    fi
-    wait $LOOP_PID 2> /dev/null
+    done < "$flist"
     cat "$masks" >&2
     rm -f "$masks" "$tmpfifo" "$match"
 
@@ -377,6 +372,8 @@ pkg_raise () {
     if [ -x "$(command -v mpb)" ]
     then
         mkfifo "$tmpfifo"
+        nfiles=$(wc -l < "$raise")
+        mpb -v "$nfiles" < "$tmpfifo" &
     fi
     masks="masks.txt"
     touch "$masks"
@@ -394,14 +391,7 @@ pkg_raise () {
             mv "$MINPKG_ROOT/$path.$pkgid" "$MINPKG_ROOT/$path"
             mod=$((mod+1))
         fi
-    done < "$raise" &
-    LOOP_PID=$!
-    if [ -x "$(command -v mpb)" ]
-    then
-        nfiles=$(wc -l < "$raise")
-        mpb -v "$nfiles" < "$tmpfifo"
-    fi
-    wait $LOOP_PID 2> /dev/null
+    done < "$raise"
     cat "$masks" >&2
     rm -f "$masks" "$tmpfifo"
     rm "$raise"
