@@ -403,6 +403,13 @@ pkg_raise () {
     printf "modified %d files\n" "$mod"
 }
 
+if [ $# -eq 0 ]
+then
+    printf "%s\n" "no command supplied" >&2
+    help >&2
+    exit 1
+fi
+
 if [ ! -d "$MINPKG_ROOT" ]
 then
     MINPKG_ROOT="$PWD"
