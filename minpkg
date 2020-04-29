@@ -165,15 +165,16 @@ pkg_del () {
     sub=0
     mod=0
     hid=0
-    match="$MINPKG_ROOT/etc/pkg/MATCH"
-    tmpfifo="curpath.fifo"
+    mkdir -p "$tmpdir"
+    match="$tmpdir/match"
+    tmpfifo="$tmpdir/curpath.fifo"
     if [ -x "$(command -v mpb)" ]
     then
         mkfifo "$tmpfifo"
         nfiles=$(wc -l < "$flist")
         mpb -v "$nfiles" < "$tmpfifo" &
     fi
-    masks="masks.txt"
+    masks="$tmpdir/masks"
     touch "$masks"
     while read path
     do
@@ -212,7 +213,7 @@ pkg_del () {
         fi
     done < "$flist"
     cat "$masks" >&2
-    rm -f "$masks" "$tmpfifo" "$match"
+    rm -rf "$tmpdir"
 
     rm "$flist"
 
@@ -246,24 +247,28 @@ pkg_pack () {
         fail "$pkgid is not installed on $MINPKG_ROOT"
     fi
 
-    cp "$flist" paths.txt
+    mkdir -p "$tmpdir"
+    paths="$tmpdir/paths.txt"
+    info="$tmpdir/info.txt"
+    files="$tmpdir/files.tar"
+    cp "$flist" "$paths"
     if [ -x "$(command -v mpb)" ]
     then
-        nfiles=$(wc -l < paths.txt)
-        tar -c -C "$MINPKG_ROOT" -f files.tar -T paths.txt -v | mpb -v "$nfiles"
+        nfiles=$(wc -l < "$paths")
+        tar -c -C "$MINPKG_ROOT" -f "$files" -T "$paths" -v | mpb -v "$nfiles"
     else
-        tar -c -C "$MINPKG_ROOT" -f files.tar -T paths.txt
+        tar -c -C "$MINPKG_ROOT" -f "$files" -T "$paths"
     fi
-cat <<EOF > info.txt
+cat <<EOF > "$info"
 name:$(printf "$pkgid" | cut -d- -f1)
 version:$(printf "$pkgid" | cut -d- -f2)
 arch:$(uname -m)
-size:$(du files.tar | cut -f1)
+size:$(du "$files" | cut -f1)
 EOF
-    gzip files.tar
+    gzip "$files"
     fname="$1.tar"
-    tar -c -f "$fname" info.txt paths.txt files.tar.gz
-    rm info.txt paths.txt files.tar.gz
+    tar -c -C "$tmpdir" -f "$fname" info.txt paths.txt files.tar.gz
+    rm -rf "$tmpdir"
     du -h "$fname"
 }
 
@@ -366,16 +371,17 @@ pkg_raise () {
     confl="$MINPKG_ROOT/etc/pkg/CONFLICT"
 
     mod=0
-    raise="$MINPKG_ROOT/etc/pkg/RAISE"
+    mkdir -p "$tmpdir"
+    raise="$tmpdir/raise"
     cat "$flist" "$confl" | sort | uniq -d > "$raise"
-    tmpfifo="curpath.fifo"
+    tmpfifo="$tmpdir/curpath.fifo"
     if [ -x "$(command -v mpb)" ]
     then
         mkfifo "$tmpfifo"
         nfiles=$(wc -l < "$raise")
         mpb -v "$nfiles" < "$tmpfifo" &
     fi
-    masks="masks.txt"
+    masks="$tmpdir/masks"
     touch "$masks"
     while read path
     do
@@ -393,8 +399,7 @@ pkg_raise () {
         fi
     done < "$raise"
     cat "$masks" >&2
-    rm -f "$masks" "$tmpfifo"
-    rm "$raise"
+    rm -rf "$tmpdir"
 
     sed -n "/^$pkgid\$/!p" "$plist" > "$plist.tmp"
     mv "$plist.tmp" "$plist"
@@ -420,6 +425,8 @@ then
     MINPKG_ROOT="$2"
     shift 2
 fi
+
+[ -w "/tmp" ] && tmpdir="/tmp/minpkg-tmp.$$" || tmpdir="$MINPKG_ROOT/etc/pkg/tmp.$$"
 
 cmd="$1"
 shift
