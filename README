@@ -1,8 +1,18 @@
 This is a minimal package manager implemented in a single shell script.
 
-Package metadata is maintained as plain text in /etc/pkg.
+The local database of packages installed is maintained as plain text in /etc/pkg.
 
-Packages are *.tgz files with paths relative to the root directory.
+Packages are uncompressed *.tar files with the following structure:
+  <name>-<version>.tar
+    info.txt
+    paths.txt
+    files.tar.gz
+      <package contents>
+Tha actual files to be installed are compressed inside "files.tar.gz".
+The file "info.txt" has colon-separated key-value pairs of metadata.
+  Required keys are name, version, arch & size.
+The file "paths.txt" is a list of filenames relative to the rootfs.
+  Must be exactly the output of `tar tf files.tar.gz | grep -v '/$'`.
 Path names in packages must not begin with a slash.
 Path names in packages must not contain whitespaces.
 
