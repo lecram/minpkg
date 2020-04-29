@@ -408,13 +408,6 @@ pkg_raise () {
     printf "modified %d files\n" "$mod"
 }
 
-if [ $# -eq 0 ]
-then
-    printf "%s\n" "no command supplied" >&2
-    help >&2
-    exit 1
-fi
-
 if [ ! -d "$MINPKG_ROOT" ]
 then
     MINPKG_ROOT="$PWD"
@@ -424,6 +417,13 @@ if [ "$1" = "-r" ]
 then
     MINPKG_ROOT="$2"
     shift 2
+fi
+
+if [ $# -eq 0 ]
+then
+    printf "%s\n" "no command supplied" >&2
+    help >&2
+    exit 1
 fi
 
 [ -w "/tmp" ] && tmpdir="/tmp/minpkg-tmp.$$" || tmpdir="$MINPKG_ROOT/etc/pkg/tmp.$$"
