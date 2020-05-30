@@ -180,7 +180,7 @@ pkg_del () {
     do
         if [ "$pbar" -gt 0 ]
         then
-            printf "%s\n" "$path" > "$tmpfifo"
+            printf "%s\n" "$path"
         fi
         if grep -qF "$path" "$confl"
         then
@@ -211,7 +211,7 @@ pkg_del () {
             done
             sub=$((sub+1))
         fi
-    done < "$flist"
+    done < "$flist" > "$tmpfifo"
     cat "$masks" >&2
     rm -rf "$tmpdir"
 
@@ -387,7 +387,7 @@ pkg_raise () {
     do
         if [ "$pbar" -gt 0 ]
         then
-            printf "%s\n" "$path" > "$tmpfifo"
+            printf "%s\n" "$path"
         fi
         from=$(pkg_from "$path")
         if [ "$from" != "$pkgid" ]
@@ -397,7 +397,7 @@ pkg_raise () {
             mv "$MINPKG_ROOT/$path.$pkgid" "$MINPKG_ROOT/$path"
             mod=$((mod+1))
         fi
-    done < "$raise"
+    done < "$raise" > "$tmpfifo"
     cat "$masks" >&2
     rm -rf "$tmpdir"
 
