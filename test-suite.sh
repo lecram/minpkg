@@ -23,7 +23,8 @@ log "Creating test directory structure"
 rm -rf "$testdir"
 mkdir "$testdir" || fail "unable to create test directory at $testdir"
 mkdir -p "$rootfs" "$pkg/files"
-printf "version\n" > "$pkg/paths.txt"
+touch "$pkg/files/somefile"
+printf "version\nsomefile\n" > "$pkg/paths.txt"
 printf "1.2.3\n2.3.4\n" | while read version
 do
     printf "$version" > "$pkg/files/version"
@@ -46,7 +47,7 @@ $minpkg init || fail "'init' command failed"
 
 log "Testing 'to' command"
 $minpkg to "$testdir/foo-1.2.3.tar" > "$tmpfile" || fail "'to' command failed"
-printf "version\n" | cmp -s "$tmpfile" || fail "wrong 'to' output"
+printf "version\nsomefile\n" | cmp -s "$tmpfile" || fail "wrong 'to' output"
 
 log "Installing foo-1.2.3"
 $minpkg add "$testdir/foo-1.2.3.tar" || fail "'add' command failed"
@@ -83,7 +84,7 @@ cd "$testdir"
 MINPKG_ROOT=$rootfs $rootfs/bin/minpkg pack foo-1.2.3 || fail "'pack' command failed"
 cd -
 $minpkg to "$testdir/foo-1.2.3.tar" > "$tmpfile" || fail "'to' command failed"
-printf "version\n" | cmp -s "$tmpfile" || fail "wrong 'to' output"
+printf "version\nsomefile\n" | cmp -s "$tmpfile" || fail "wrong 'to' output"
 
 log "Uninstalling foo-1.2.3"
 $minpkg del foo-1.2.3 || fail "'del' command failed"
