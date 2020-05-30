@@ -126,7 +126,7 @@ pkg_add () {
         fi
     done < "$flist"
 
-    if [ -x "$(command -v mpb)" ]
+    if [ "$pbar" -gt 0 ]
     then
         nfiles=$(tar -x -O -f "$1" paths.txt | wc -l)
         tar -x -O -f "$1" files.tar.gz | tar -C "$MINPKG_ROOT" -x -z -o -v | mpb -v "$nfiles"
@@ -168,7 +168,7 @@ pkg_del () {
     mkdir -p "$tmpdir"
     match="$tmpdir/match"
     tmpfifo="$tmpdir/curpath.fifo"
-    if [ -x "$(command -v mpb)" ]
+    if [ "$pbar" -gt 0 ]
     then
         mkfifo "$tmpfifo"
         nfiles=$(wc -l < "$flist")
@@ -178,7 +178,7 @@ pkg_del () {
     touch "$masks"
     while read path
     do
-        if [ -x "$(command -v mpb)" ]
+        if [ "$pbar" -gt 0 ]
         then
             printf "%s\n" "$path" > "$tmpfifo"
         fi
@@ -252,7 +252,7 @@ pkg_pack () {
     info="$tmpdir/info.txt"
     files="$tmpdir/files.tar"
     cp "$flist" "$paths"
-    if [ -x "$(command -v mpb)" ]
+    if [ "$pbar" -gt 0 ]
     then
         nfiles=$(wc -l < "$paths")
         tar -c -C "$MINPKG_ROOT" -f "$files" -T "$paths" -v | mpb -v "$nfiles"
@@ -375,7 +375,7 @@ pkg_raise () {
     raise="$tmpdir/raise"
     cat "$flist" "$confl" | sort | uniq -d > "$raise"
     tmpfifo="$tmpdir/curpath.fifo"
-    if [ -x "$(command -v mpb)" ]
+    if [ "$pbar" -gt 0 ]
     then
         mkfifo "$tmpfifo"
         nfiles=$(wc -l < "$raise")
@@ -385,7 +385,7 @@ pkg_raise () {
     touch "$masks"
     while read path
     do
-        if [ -x "$(command -v mpb)" ]
+        if [ "$pbar" -gt 0 ]
         then
             printf "%s\n" "$path" > "$tmpfifo"
         fi
@@ -427,6 +427,8 @@ then
 fi
 
 [ -w "/tmp" ] && tmpdir="/tmp/minpkg-tmp.$$" || tmpdir="$MINPKG_ROOT/etc/pkg/tmp.$$"
+
+[ -x "$(command -v mpb)" ] && pbar=1 || pbar=0
 
 cmd="$1"
 shift
