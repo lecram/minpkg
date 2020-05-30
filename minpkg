@@ -196,7 +196,7 @@ pkg_del () {
             then
                 below=$(sed -n '2p' "$match")
                 mv "$MINPKG_ROOT/$path.$below" "$MINPKG_ROOT/$path"
-                printf "unmasked %s %s\n" "$below" "$path" > "$masks"
+                printf "unmasked %s %s\n" "$below" "$path" >> "$masks"
                 mod=$((mod+1))
             else
                 rm "$MINPKG_ROOT/$path.$pkgid"
@@ -393,7 +393,7 @@ pkg_raise () {
         if [ "$from" != "$pkgid" ]
         then
             mv "$MINPKG_ROOT/$path" "$MINPKG_ROOT/$path.$from"
-            printf "masked %s %s\n" "$from" "$path" > "$masks"
+            printf "masked %s %s\n" "$from" "$path" >> "$masks"
             mv "$MINPKG_ROOT/$path.$pkgid" "$MINPKG_ROOT/$path"
             mod=$((mod+1))
         fi
