@@ -38,6 +38,8 @@ Commands:
     the PKGID is inferred from PKGFILE (/path/to/foo.tgz -> foo)
   del PKGID
     uninstall package named PKGID from ROOT
+  info PKGID
+    show package metadata
   pack PKGID
     create tarball from installed package
   raise PKGID
@@ -50,7 +52,7 @@ Commands:
   to PKGFILE
     print the path of each file in the package
 
-It's sufficient to type only the first character of a command (r -> raise).
+Except for init, it's sufficient to type only the first letter of a command (r -> raise).
 
 A conflict occurs when a new package installs a path that was already provided by another one.
 In this situation, minpkg saves a backup of the old file before installing the new one.

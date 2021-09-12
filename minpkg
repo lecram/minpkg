@@ -44,6 +44,7 @@ pkg_init () {
     fi
 
     mkdir -p "$MINPKG_ROOT/etc/pkg/list"
+    mkdir -p "$MINPKG_ROOT/etc/pkg/info"
     touch "$MINPKG_ROOT/etc/pkg/PACKAGES"
     touch "$MINPKG_ROOT/etc/pkg/CONFLICT"
     mkdir -p "$MINPKG_ROOT/bin"
@@ -134,6 +135,9 @@ pkg_add () {
         tar -x -O -f "$1" files.tar.gz | tar -C "$MINPKG_ROOT" -x -z -o
     fi
 
+    info="$MINPKG_ROOT/etc/pkg/info/$pkgid"
+    tar -x -O -f "$1" info.txt > "$info"
+
     printf "%s\n" "$pkgid" >> "$plist"
 
     printf "added %d new files\n" "$add"
@@ -220,6 +224,9 @@ pkg_del () {
     sed -n "/^$pkgid\$/!p" "$plist" > "$plist.tmp"
     mv "$plist.tmp" "$plist"
 
+    info="$MINPKG_ROOT/etc/pkg/info/$pkgid"
+    rm -f "$info"
+
     printf "removed %d files\n" "$sub"
     if [ $hid -ne 0 ]
     then
@@ -229,6 +236,31 @@ pkg_del () {
     then
         printf "unmasked %d files\n" "$mod"
     fi
+}
+
+pkg_info () {
+    if [ "$#" -ne 1 ]
+    then
+        fail "usage: $0 info PKGID"
+    fi
+
+    assert_readable "$MINPKG_ROOT"
+
+    pkgid=$(basename "$1" .tar)
+    plist="$MINPKG_ROOT/etc/pkg/PACKAGES"
+
+    if ! grep -qF "$pkgid" "$plist"
+    then
+        fail "$pkgid is not installed on $MINPKG_ROOT"
+    fi
+
+    info="$MINPKG_ROOT/etc/pkg/info/$pkgid"
+
+    if [ ! -f "$info" ]
+    then
+        fail "no metadata for $pkgid"
+    fi
+    awk -F: '{printf "%-15s %s\n", $1, $2}' "$info"
 }
 
 pkg_pack () {
@@ -259,12 +291,18 @@ pkg_pack () {
     else
         tar -c -C "$MINPKG_ROOT" -f "$files" -T "$paths"
     fi
+    pinfo="$MINPKG_ROOT/etc/pkg/info/$pkgid"
+    if [ -f "$pinfo" ]
+    then
+        cp "$pinfo" "$info"
+    else
 cat <<EOF > "$info"
 name:$(printf "$pkgid" | cut -d- -f1)
 version:$(printf "$pkgid" | cut -d- -f2)
 arch:$(uname -m)
 size:$(du "$files" | cut -f1)
 EOF
+    fi
     gzip "$files"
     fname="$1.tar"
     tar -c -C "$tmpdir" -f "$fname" info.txt paths.txt files.tar.gz
@@ -434,10 +472,11 @@ cmd="$1"
 shift
 
 case "$cmd" in
-    i|init)   pkg_init "$@" ;;
+    init)     pkg_init "$@" ;;
     l|list)   pkg_list "$@" ;;
     a|add)    pkg_add "$@" ;;
     d|del)    pkg_del "$@" ;;
+    i|info)   pkg_info "$@" ;;
     p|pack)   pkg_pack "$@" ;;
     r|raise)  pkg_raise "$@" ;;
     t|to)     pkg_to "$@" ;;
