@@ -40,6 +40,8 @@ Commands:
     uninstall package named PKGID from ROOT
   info PKGID
     show package metadata
+  create ROOT
+    create package from files in ROOT
   pack PKGID
     create tarball from installed package
   raise PKGID

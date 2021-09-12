@@ -263,6 +263,41 @@ pkg_info () {
     awk -F: '{printf "%-15s %s\n", $1, $2}' "$info"
 }
 
+pkg_create () {
+    if [ "$#" -ne 1 ]
+    then
+        fail "usage: $0 create ROOT"
+    fi
+    root="$1"
+    assert_readable "$root"
+    cwd="$PWD"
+    mkdir -p "$tmpdir"
+    cd "$root"
+    tar -vcf "$tmpdir/files.tar" * | grep -v '/$' > "$tmpdir/paths.txt"
+    cd "$tmpdir"
+cat <<EOF > info.txt
+name:
+version:$(date +"%Y.%m.%d")
+arch:$(uname -m)
+size:$(du files.tar | cut -f1)
+desc:
+proj-url:https=//
+src-url:https=//
+repo-url:https=//
+build-date:$(date +"%Y-%m-%d")
+EOF
+    $EDITOR info.txt
+    printf 'compressing files...\n'
+    gzip files.tar
+    name=$(awk -F: '$1=="name" {print $2}' info.txt)
+    version=$(awk -F: '$1=="version" {print $2}' info.txt)
+    pkgid="$name-$version"
+    tar -cf "$cwd/$pkgid.tar" info.txt paths.txt files.tar.gz
+    printf 'created package %s\n' "$pkgid"
+    cd "$cwd"
+    rm -rf "$tmpdir"
+}
+
 pkg_pack () {
     if [ "$#" -ne 1 ]
     then
@@ -477,6 +512,7 @@ case "$cmd" in
     a|add)    pkg_add "$@" ;;
     d|del)    pkg_del "$@" ;;
     i|info)   pkg_info "$@" ;;
+    c|create) pkg_create "$@" ;;
     p|pack)   pkg_pack "$@" ;;
     r|raise)  pkg_raise "$@" ;;
     t|to)     pkg_to "$@" ;;
